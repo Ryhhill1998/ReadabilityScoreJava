@@ -1,29 +1,36 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        String text = getInputText();
-        evaluateTextLevel(text);
-    }
-
-    private static boolean textIsHard(int averageSentenceLength) {
-        return averageSentenceLength > 10;
-    }
-
-    private static String getInputText() {
-        Scanner scanner = new Scanner(System.in);
-        return scanner.nextLine();
-    }
-
-    private static void evaluateTextLevel(String text) {
-        String[] sentences = getSentences(text);
-        int averageLength = getAverageSentenceLength(sentences);
-
-        if (textIsHard(averageLength)) {
-            System.out.println("HARD");
-        } else {
-            System.out.println("EASY");
+        try {
+//            String filePath = args[0];
+            String text = getFileText("in.txt");
+            System.out.println(getWordCount(text));
+            System.out.println(getSentenceCount(text));
+            System.out.println(getCharacterCount(text));
+            System.out.println(Arrays.toString(getSentences(text)));
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
         }
+    }
+
+    private static String getFileText(String filePath) throws FileNotFoundException {
+        File file = new File(filePath);
+        Scanner scanner = new Scanner(file);
+        StringBuilder text = new StringBuilder();
+
+        while (scanner.hasNextLine()) {
+            if (!text.isEmpty()) {
+                text.append(" ");
+            }
+
+            text.append(scanner.nextLine());
+        }
+
+        return text.toString();
     }
 
     private static String[] getSentences(String text) {
@@ -36,13 +43,31 @@ public class Main {
         return sentences;
     }
 
-    private static int getAverageSentenceLength(String[] sentences) {
-        double sum = 0;
-
-        for (String s : sentences) {
-            sum += s.split("\\s").length;
-        }
-
-        return (int) Math.ceil(sum / sentences.length);
+    private static String[] getWords(String text) {
+        return text.split(" ");
     }
+
+    private static String[] getCharacters(String text) {
+        text = text.replace(" ", "")
+                .replace("\t", "")
+                .replace("\n", "");
+
+        return text.split("");
+    }
+
+    private static int getSentenceCount(String text) {
+        return getSentences(text).length;
+    }
+
+    private static int getWordCount(String text) {
+        return getWords(text).length;
+    }
+
+    private static int getCharacterCount(String text) {
+        return getCharacters(text).length;
+    }
+
+//    private static int calculateARI() {
+//
+//    }
 }
