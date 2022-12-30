@@ -4,21 +4,15 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-//        try {
-//            String filePath = args[0];
-//            String text = getFileText(filePath);
-//            evaluateText(text);
-//        } catch (FileNotFoundException e) {
-//            System.out.println(e.getMessage());
-//        }
-
-        String text = "This is the front page of the Simple English Wikipedia. Wikipedias are places where people work together to write encyclopedias in different languages. We use Simple English words and grammar here. The Simple English Wikipedia is for everyone! That includes children and adults who are learning English. There are 142,262 articles on the Simple English Wikipedia. All of the pages are free to use. They have all been published under both the Creative Commons License and the GNU Free Documentation License. You can help here! You may change these pages and make new pages. Read the help pages and other good pages to learn how to write pages here. If you need help, you may ask questions at Simple talk. Use Basic English vocabulary and shorter sentences. This allows people to understand normally complex terms or phrases.";
-        evaluateText(text);
-        printMenu();
-    }
-
-    private static void printMenu() {
-        System.out.print("Enter the score you want to calculate (ARI, FK, SMOG, CL, all): ");
+        try {
+            String filePath = "in.txt";
+            String text = getFileText(filePath);
+            evaluateText(text);
+            printMenu();
+            evaluateSelection(getSelection(), text);
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static String getFileText(String filePath) throws FileNotFoundException {
@@ -31,6 +25,102 @@ public class Main {
         }
 
         return text.toString();
+    }
+
+    private static void evaluateText(String text) {
+        double words = getWordCount(text);
+        double sentences = getSentenceCount(text);
+        double characters = getCharacterCount(text);
+        double syllables = getSyllableCount(text);
+        double polysyllables = getPolysyllableCount(text);
+
+        System.out.printf("Words: %.0f\n", words);
+        System.out.printf("Sentences: %.0f\n", sentences);
+        System.out.printf("Characters: %.0f\n", characters);
+        System.out.printf("Syllables: %.0f\n", syllables);
+        System.out.printf("Polysyllables: %.0f\n", polysyllables);
+    }
+
+    private static void printMenu() {
+        System.out.print("Enter the score you want to calculate (ARI, FK, SMOG, CL, all): ");
+    }
+
+    private static String getSelection() {
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine().toUpperCase();
+    }
+
+    private static void evaluateSelection(String selection, String text) {
+        double score, age;
+
+        switch (selection) {
+            case "ARI":
+                // get text ARI score
+                score = getTextARIScore(text);
+                age = getTextAge(getScoreUpperBound(score));
+                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                        score, age);
+                break;
+            case "FK":
+                // get text FK score
+                score = getTextFKScore(text);
+                age = getTextAge(getScoreUpperBound(score));
+                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                        score, age);
+                break;
+            case "SMOG":
+                // get text SMOG score
+                score = getTextSMOGScore(text);
+                age = getTextAge(getScoreUpperBound(score));
+                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                        score, age);
+                break;
+            case "CL":
+                // get text CL score
+                score = getTextCLScore(text);
+                age = getTextAge(getScoreUpperBound(score) + 1);
+                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                        score, age);
+                break;
+            case "ALL":
+                // get all 4 scores and average them
+                double ageSum = 0;
+
+                score = getTextARIScore(text);
+                age = getTextAge(getScoreUpperBound(score));
+                ageSum += age;
+                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                        score, age);
+
+                score = getTextFKScore(text);
+                age = getTextAge(getScoreUpperBound(score));
+                ageSum += age;
+                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                        score, age);
+
+                score = getTextSMOGScore(text);
+                age = getTextAge(getScoreUpperBound(score));
+                ageSum += age;
+                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                        score, age);
+
+                score = getTextCLScore(text);
+                age = getTextAge(getScoreUpperBound(score) + 1);
+                ageSum += age;
+                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                        score, age);
+
+                double averageTextAge = ageSum / 4;
+                System.out.printf("\nThis text should be understood in average by %.2f-year-olds.",
+                        averageTextAge);
+                break;
+            default:
+                System.out.println("Invalid entry!");
+        }
+    }
+
+    private static double getScoreUpperBound(double score) {
+        return Math.ceil(score);
     }
 
     private static String[] getSentences(String text) {
@@ -112,16 +202,16 @@ public class Main {
         return syllables;
     }
 
-    private static boolean ispolysyllable(String word) {
+    private static boolean isPolysyllable(String word) {
         return countSyllables(word) > 2;
     }
 
-    private static double getpolysyllableCount(String text) {
+    private static double getPolysyllableCount(String text) {
         String[] words = getWords(text);
         double polysyllables = 0;
 
         for (String word : words) {
-            if (ispolysyllable(word)) {
+            if (isPolysyllable(word)) {
                 polysyllables++;
             }
         }
@@ -160,66 +250,29 @@ public class Main {
     }
 
     private static double getTextSMOGScore(String text) {
-        double polysyllables = getpolysyllableCount(text);
+        double polysyllables = getPolysyllableCount(text);
         double sentences = getSentenceCount(text);
         return calculateSMOG(polysyllables, sentences);
     }
 
     private static double getTextCLScore(String text) {
+        double words = getWordCount(text);
         double characters = getCharacterCount(text);
-        double averageCharactersPer100Words = characters / (text.length() / 100.0);
+        double averageCharactersPer100Words = characters / (words / 100.0);
         double sentences = getSentenceCount(text);
-        double averageSentencesPer100Words = sentences / (text.length() / 100.0);
+        double averageSentencesPer100Words = sentences / (words / 100.0);
         return calculateCL(averageCharactersPer100Words, averageSentencesPer100Words);
     }
 
-    private static String getTextAge(double score) {
-        String ageRange;
+    private static double getTextAge(double score) {
+        double age;
 
-        if (score < 2) {
-            ageRange = "5-6";
-        } else if (score < 3) {
-            ageRange = "6-7";
-        } else if (score < 4) {
-            ageRange = "7-8";
-        } else if (score < 5) {
-            ageRange = "8-9";
-        } else if (score < 6) {
-            ageRange = "9-10";
-        } else if (score < 7) {
-            ageRange = "10-11";
-        } else if (score < 8) {
-            ageRange = "11-12";
-        } else if (score < 9) {
-            ageRange = "12-13";
-        } else if (score < 10) {
-            ageRange = "13-14";
-        } else if (score < 11) {
-            ageRange = "14-15";
-        } else if (score < 12) {
-            ageRange = "15-16";
-        } else if (score < 13) {
-            ageRange = "16-17";
-        } else if (score < 14) {
-            ageRange = "17-18";
+        if (score == 14) {
+            age = 22;
         } else {
-            ageRange = "18-22";
+            age = score + 5;
         }
 
-        return ageRange;
-    }
-
-    private static void evaluateText(String text) {
-        double words = getWordCount(text);
-        double sentences = getSentenceCount(text);
-        double characters = getCharacterCount(text);
-        double syllables = getSyllableCount(text);
-        double polysyllables = getpolysyllableCount(text);
-
-        System.out.printf("Words: %.0f\n", words);
-        System.out.printf("Sentences: %.0f\n", sentences);
-        System.out.printf("Characters: %.0f\n", characters);
-        System.out.printf("Syllables: %.0f\n", syllables);
-        System.out.printf("Polysyllables: %.0f\n", polysyllables);
+        return age;
     }
 }
