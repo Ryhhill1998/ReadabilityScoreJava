@@ -62,63 +62,28 @@ public class Main {
         switch (selection) {
             case "ARI":
                 // get text ARI score
-                score = getTextARIScore(text);
-                age = getTextAge(getScoreUpperBound(score));
-                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
-                        score, age);
+                displayARIScore(text);
                 break;
             case "FK":
                 // get text FK score
-                score = getTextFKScore(text);
-                age = getTextAge(getScoreUpperBound(score));
-                System.out.printf("\nFlesch–Kincaid readability tests: %.2f (about %.0f-year-olds).",
-                        score, age);
+                displayFKScore(text);
                 break;
             case "SMOG":
                 // get text SMOG score
-                score = getTextSMOGScore(text);
-                age = getTextAge(getScoreUpperBound(score));
-                System.out.printf("\nSimple Measure of Gobbledygook: %.2f (about %.0f-year-olds).",
-                        score, age);
+                displaySMOGScore(text);
                 break;
             case "CL":
                 // get text CL score
-                score = getTextCLScore(text);
-                age = getTextAge(getScoreUpperBound(score) + 1);
-                System.out.printf("\nColeman–Liau index: %.2f (about %.0f-year-olds).",
-                        score, age);
+                displayCLScore(text);
                 break;
             case "ALL":
                 // get all 4 scores and average them
-                double ageSum = 0;
-
-                score = getTextARIScore(text);
-                age = getTextAge(getScoreUpperBound(score));
-                ageSum += age;
-                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
-                        score, age);
-
-                score = getTextFKScore(text);
-                age = getTextAge(getScoreUpperBound(score));
-                ageSum += age;
-                System.out.printf("\nFlesch–Kincaid readability tests: %.2f (about %.0f-year-olds).",
-                        score, age);
-
-                score = getTextSMOGScore(text);
-                age = getTextAge(getScoreUpperBound(score));
-                ageSum += age;
-                System.out.printf("\nSimple Measure of Gobbledygook: %.2f (about %.0f-year-olds).",
-                        score, age);
-
-                score = getTextCLScore(text);
-                age = getTextAge(getScoreUpperBound(score) + 1);
-                ageSum += age;
-                System.out.printf("\nColeman–Liau index: %.2f (about %.0f-year-olds).\n",
-                        score, age);
-
-                double averageTextAge = ageSum / 4;
-                System.out.printf("\nThis text should be understood in average by %.2f-year-olds.",
-                        averageTextAge);
+                displayARIScore(text);
+                displayFKScore(text);
+                displaySMOGScore(text);
+                displayCLScore(text);
+                System.out.println();
+                displayAverageTextAge(text);
                 break;
             default:
                 System.out.println("Invalid entry!");
@@ -280,6 +245,53 @@ public class Main {
         }
 
         return age;
+    }
+
+    private static double getAverageTextAge(String text) {
+        double ageSum = 0;
+
+        double textARI = getScoreUpperBound(getTextARIScore(text));
+        double textFK = getScoreUpperBound(getTextFKScore(text));
+        double textSMOG = getScoreUpperBound(getTextSMOGScore(text));
+        double textCL = getScoreUpperBound(getTextCLScore(text));
+
+        ageSum += (getTextAge(textARI) + getTextAge(textFK) + getTextAge(textSMOG) + getTextAge(textCL + 1));
+
+        return ageSum / 4;
+    }
+
+    private static void displayARIScore(String text) {
+        double score = getTextARIScore(text);
+        double age = getTextAge(getScoreUpperBound(score));
+        System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                score, age);
+    }
+
+    private static void displayFKScore(String text) {
+        double score = getTextFKScore(text);
+        double age = getTextAge(getScoreUpperBound(score));
+        System.out.printf("\nFlesch–Kincaid readability tests: %.2f (about %.0f-year-olds).",
+                score, age);
+    }
+
+    private static void displaySMOGScore(String text) {
+        double score = getTextSMOGScore(text);
+        double age = getTextAge(getScoreUpperBound(score));
+        System.out.printf("\nSimple Measure of Gobbledygook: %.2f (about %.0f-year-olds).",
+                score, age);
+    }
+
+    private static void displayCLScore(String text) {
+        double score = getTextCLScore(text);
+        double age = getTextAge(getScoreUpperBound(score) + 1);
+        System.out.printf("\nColeman–Liau index: %.2f (about %.0f-year-olds).",
+                score, age);
+    }
+
+    private static void displayAverageTextAge(String text) {
+        double averageTextAge = getAverageTextAge(text);
+        System.out.printf("\nThis text should be understood in average by %.2f-year-olds.",
+                averageTextAge);
     }
 }
 
