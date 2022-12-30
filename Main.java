@@ -13,11 +13,8 @@ public class Main {
 //        }
 
         String text = "This is the front page of the Simple English Wikipedia. Wikipedias are places where people work together to write encyclopedias in different languages. We use Simple English words and grammar here. The Simple English Wikipedia is for everyone! That includes children and adults who are learning English. There are 142,262 articles on the Simple English Wikipedia. All of the pages are free to use. They have all been published under both the Creative Commons License and the GNU Free Documentation License. You can help here! You may change these pages and make new pages. Read the help pages and other good pages to learn how to write pages here. If you need help, you may ask questions at Simple talk. Use Basic English vocabulary and shorter sentences. This allows people to understand normally complex terms or phrases.";
-        System.out.println(getWordCount(text));
-        System.out.println(getSentenceCount(text));
-        System.out.println(getCharacterCount(text));
-        System.out.println(getSyllableCount(text));
-        System.out.println(getPolysyllableCount(text));
+        evaluateText(text);
+        printMenu();
     }
 
     private static void printMenu() {
@@ -73,11 +70,110 @@ public class Main {
         return getCharacters(text).length;
     }
 
+    private static double countSyllables(String word) {
+        String vowels = "aeiouy";
+
+        String[] characters = word.split("");
+        double syllables = 0;
+        boolean previousWasVowel = false;
+
+        for (int i = 0; i < characters.length; i++) {
+            String character = characters[i].toLowerCase();
+
+            if (i == characters.length - 1 && character.equals("e")) {
+                break;
+            }
+
+            if (vowels.contains(character)) {
+                if (!previousWasVowel) {
+                    syllables++;
+                    previousWasVowel = true;
+                }
+            } else {
+                previousWasVowel = false;
+            }
+        }
+
+        if (syllables == 0) {
+            syllables = 1;
+        }
+
+        return syllables;
+    }
+
+    private static double getSyllableCount(String text) {
+        String[] words = getWords(text);
+        double syllables = 0;
+
+        for (String word : words) {
+            syllables += countSyllables(word);
+        }
+
+        return syllables;
+    }
+
+    private static boolean ispolysyllable(String word) {
+        return countSyllables(word) > 2;
+    }
+
+    private static double getpolysyllableCount(String text) {
+        String[] words = getWords(text);
+        double polysyllables = 0;
+
+        for (String word : words) {
+            if (ispolysyllable(word)) {
+                polysyllables++;
+            }
+        }
+
+        return polysyllables;
+    }
+
     private static double calculateARI(double words, double sentences, double characters) {
         return 4.71 * (characters / words) + 0.5 * (words / sentences) - 21.43;
     }
 
-    private static String getTextAgeRange(double score) {
+    private static double calculateFK(double words, double sentences, double syllables) {
+        return 0.39 * (words / sentences) + 11.8 * (syllables / words) - 15.59;
+    }
+
+    private static double calculateSMOG(double polysyllables, double sentences) {
+        return 1.043 * Math.sqrt(polysyllables * (30 / sentences)) + 3.1291;
+    }
+
+    private static double calculateCL(double L, double S) {
+        return 0.0588 * L - 0.296 * S - 15.8;
+    }
+
+    private static double getTextARIScore(String text) {
+        double words = getWordCount(text);
+        double sentences = getSentenceCount(text);
+        double characters = getCharacterCount(text);
+        return calculateARI(words, sentences, characters);
+    }
+
+    private static double getTextFKScore(String text) {
+        double words = getWordCount(text);
+        double sentences = getSentenceCount(text);
+        double syllables = getSyllableCount(text);
+        return calculateFK(words, sentences, syllables);
+    }
+
+    private static double getTextSMOGScore(String text) {
+        double polysyllables = getpolysyllableCount(text);
+        double sentences = getSentenceCount(text);
+        return calculateSMOG(polysyllables, sentences);
+    }
+
+    private static double getTextCLScore(String text) {
+        double characters = getCharacterCount(text);
+        double averageCharactersPer100Words = characters / (text.length() / 100.0);
+        double sentences = getSentenceCount(text);
+        double averageSentencesPer100Words = sentences / (text.length() / 100.0);
+        return calculateCL(averageCharactersPer100Words, averageSentencesPer100Words);
+    }
+
+    private static String getTextAge(double score) {
         String ageRange;
 
         if (score < 2) {
@@ -117,74 +213,13 @@ public class Main {
         double words = getWordCount(text);
         double sentences = getSentenceCount(text);
         double characters = getCharacterCount(text);
-        double textARI = calculateARI(words, sentences, characters);
+        double syllables = getSyllableCount(text);
+        double polysyllables = getpolysyllableCount(text);
 
         System.out.printf("Words: %.0f\n", words);
         System.out.printf("Sentences: %.0f\n", sentences);
         System.out.printf("Characters: %.0f\n", characters);
-        System.out.printf("The score is: %.2f\n", textARI);
-        System.out.println("This text should be understood by "
-                + getTextAgeRange(Math.ceil(textARI))
-                + " year-olds.");
-    }
-
-    private static int countSyllables(String word) {
-        String vowels = "aeiouy";
-
-        String[] characters = word.split("");
-        int syllables = 0;
-        boolean previousWasVowel = false;
-
-        for (int i = 0; i < characters.length; i++) {
-            String character = characters[i].toLowerCase();
-
-            if (i == characters.length - 1 && character.equals("e")) {
-                break;
-            }
-
-            if (vowels.contains(character)) {
-                if (!previousWasVowel) {
-                    syllables++;
-                    previousWasVowel = true;
-                }
-            } else {
-                previousWasVowel = false;
-            }
-        }
-
-        if (syllables == 0) {
-            syllables = 1;
-        }
-
-        return syllables;
-    }
-
-    private static int getSyllableCount(String text) {
-        String[] words = getWords(text);
-        int syllables = 0;
-
-        for (String word : words) {
-            syllables += countSyllables(word);
-        }
-
-        return syllables;
-    }
-
-    private static boolean isPolySyllable(String word) {
-        return countSyllables(word) > 2;
-    }
-
-    private static int getPolysyllableCount(String text) {
-        String[] words = getWords(text);
-        int polySyllables = 0;
-
-        for (String word : words) {
-            if (isPolySyllable(word)) {
-                polySyllables++;
-            }
-        }
-
-        return polySyllables;
+        System.out.printf("Syllables: %.0f\n", syllables);
+        System.out.printf("Polysyllables: %.0f\n", polysyllables);
     }
 }
-
