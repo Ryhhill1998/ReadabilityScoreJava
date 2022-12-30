@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         try {
-            String filePath = "in.txt";
+            String filePath = getFilePath();
             String text = getFileText(filePath);
             evaluateText(text);
             printMenu();
@@ -13,6 +13,12 @@ public class Main {
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private static String getFilePath() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the file you wish to read from: ");
+        return scanner.nextLine();
     }
 
     private static String getFileText(String filePath) throws FileNotFoundException {
@@ -42,7 +48,7 @@ public class Main {
     }
 
     private static void printMenu() {
-        System.out.print("Enter the score you want to calculate (ARI, FK, SMOG, CL, all): ");
+        System.out.print("\nEnter the score you want to calculate (ARI, FK, SMOG, CL, all): ");
     }
 
     private static String getSelection() {
@@ -65,21 +71,21 @@ public class Main {
                 // get text FK score
                 score = getTextFKScore(text);
                 age = getTextAge(getScoreUpperBound(score));
-                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                System.out.printf("\nFlesch–Kincaid readability tests: %.2f (about %.0f-year-olds).",
                         score, age);
                 break;
             case "SMOG":
                 // get text SMOG score
                 score = getTextSMOGScore(text);
                 age = getTextAge(getScoreUpperBound(score));
-                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                System.out.printf("\nSimple Measure of Gobbledygook: %.2f (about %.0f-year-olds).",
                         score, age);
                 break;
             case "CL":
                 // get text CL score
                 score = getTextCLScore(text);
                 age = getTextAge(getScoreUpperBound(score) + 1);
-                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                System.out.printf("\nColeman–Liau index: %.2f (about %.0f-year-olds).",
                         score, age);
                 break;
             case "ALL":
@@ -95,19 +101,19 @@ public class Main {
                 score = getTextFKScore(text);
                 age = getTextAge(getScoreUpperBound(score));
                 ageSum += age;
-                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                System.out.printf("\nFlesch–Kincaid readability tests: %.2f (about %.0f-year-olds).",
                         score, age);
 
                 score = getTextSMOGScore(text);
                 age = getTextAge(getScoreUpperBound(score));
                 ageSum += age;
-                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                System.out.printf("\nSimple Measure of Gobbledygook: %.2f (about %.0f-year-olds).",
                         score, age);
 
                 score = getTextCLScore(text);
                 age = getTextAge(getScoreUpperBound(score) + 1);
                 ageSum += age;
-                System.out.printf("\nAutomated Readability Index: %.2f (about %.0f-year-olds).",
+                System.out.printf("\nColeman–Liau index: %.2f (about %.0f-year-olds).\n",
                         score, age);
 
                 double averageTextAge = ageSum / 4;
@@ -276,3 +282,4 @@ public class Main {
         return age;
     }
 }
+
