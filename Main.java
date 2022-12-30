@@ -4,12 +4,24 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            String text = getFileText("in.txt");
-            evaluateText(text);
-        } catch (FileNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            String filePath = args[0];
+//            String text = getFileText(filePath);
+//            evaluateText(text);
+//        } catch (FileNotFoundException e) {
+//            System.out.println(e.getMessage());
+//        }
+
+        String text = "This is the front page of the Simple English Wikipedia. Wikipedias are places where people work together to write encyclopedias in different languages. We use Simple English words and grammar here. The Simple English Wikipedia is for everyone! That includes children and adults who are learning English. There are 142,262 articles on the Simple English Wikipedia. All of the pages are free to use. They have all been published under both the Creative Commons License and the GNU Free Documentation License. You can help here! You may change these pages and make new pages. Read the help pages and other good pages to learn how to write pages here. If you need help, you may ask questions at Simple talk. Use Basic English vocabulary and shorter sentences. This allows people to understand normally complex terms or phrases.";
+        System.out.println(getWordCount(text));
+        System.out.println(getSentenceCount(text));
+        System.out.println(getCharacterCount(text));
+        System.out.println(getSyllableCount(text));
+        System.out.println(getPolysyllableCount(text));
+    }
+
+    private static void printMenu() {
+        System.out.print("Enter the score you want to calculate (ARI, FK, SMOG, CL, all): ");
     }
 
     private static String getFileText(String filePath) throws FileNotFoundException {
@@ -35,7 +47,10 @@ public class Main {
     }
 
     private static String[] getWords(String text) {
-        return text.split(" ");
+        return text.replace(".", "")
+                .replace("?", "")
+                .replace("!", "")
+                .split(" ");
     }
 
     private static String[] getCharacters(String text) {
@@ -112,4 +127,64 @@ public class Main {
                 + getTextAgeRange(Math.ceil(textARI))
                 + " year-olds.");
     }
+
+    private static int countSyllables(String word) {
+        String vowels = "aeiouy";
+
+        String[] characters = word.split("");
+        int syllables = 0;
+        boolean previousWasVowel = false;
+
+        for (int i = 0; i < characters.length; i++) {
+            String character = characters[i].toLowerCase();
+
+            if (i == characters.length - 1 && character.equals("e")) {
+                break;
+            }
+
+            if (vowels.contains(character)) {
+                if (!previousWasVowel) {
+                    syllables++;
+                    previousWasVowel = true;
+                }
+            } else {
+                previousWasVowel = false;
+            }
+        }
+
+        if (syllables == 0) {
+            syllables = 1;
+        }
+
+        return syllables;
+    }
+
+    private static int getSyllableCount(String text) {
+        String[] words = getWords(text);
+        int syllables = 0;
+
+        for (String word : words) {
+            syllables += countSyllables(word);
+        }
+
+        return syllables;
+    }
+
+    private static boolean isPolySyllable(String word) {
+        return countSyllables(word) > 2;
+    }
+
+    private static int getPolysyllableCount(String text) {
+        String[] words = getWords(text);
+        int polySyllables = 0;
+
+        for (String word : words) {
+            if (isPolySyllable(word)) {
+                polySyllables++;
+            }
+        }
+
+        return polySyllables;
+    }
 }
+
