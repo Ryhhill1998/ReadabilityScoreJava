@@ -137,11 +137,12 @@ public class Main {
         String[] characters = word.split("");
         double syllables = 0;
         boolean previousWasVowel = false;
+        int length = characters.length;
 
-        for (int i = 0; i < characters.length; i++) {
+        for (int i = 0; i < length; i++) {
             String character = characters[i].toLowerCase();
 
-            if (i == characters.length - 1 && character.equals("e")) {
+            if (i == length - 1 && character.equals("e")) {
                 break;
             }
 
@@ -157,6 +158,12 @@ public class Main {
 
         if (syllables == 0) {
             syllables = 1;
+        }
+
+        if (word.endsWith("le")) {
+            if (!vowels.contains(characters[length - 3])) {
+                syllables++;
+            }
         }
 
         return syllables;
